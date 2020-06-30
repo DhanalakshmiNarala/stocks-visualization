@@ -8,7 +8,7 @@ export default function CandleStickChart() {
 
   useEffect(() => {
     getCompanyStockData("AAL").then((stockdata) => {
-      stockdata = stockdata.slice(0, 50);
+      stockdata = stockdata.slice(0, 5);
       setData(stockdata);
     });
   }, []);
@@ -24,13 +24,20 @@ export default function CandleStickChart() {
     xScale.domain(data.map((data) => data.date));
     yScale.domain([0, d3.max(data, (data) => data.volume) + 3]);
 
-    const svg = d3
+    const chartContainer = d3
       .select(svgRef.current)
       .attr("height", chartHeight + margins.top + margins.bottom)
       .attr("width", chartWidth)
       .style("background", "lightblue");
 
-    svg
+    const chart = chartContainer.append("g");
+
+    chart
+      .append("g")
+      .call(d3.axisBottom(xScale).tickSizeOuter(0))
+      .attr("transform", `translate(0, ${chartHeight})`);
+
+    chart
       .selectAll("rect")
       .data(data, (data) => data.date)
       .enter()
@@ -40,6 +47,17 @@ export default function CandleStickChart() {
       .attr("x", (data) => xScale(data.date))
       .attr("y", (data) => yScale(data.volume))
       .style("fill", "darkgreen");
+
+    chart
+      .selectAll(".label")
+      .data(data)
+      .enter()
+      .append("text")
+      .text((data) => data.date)
+      .attr("x", (data) => xScale(data.date) + xScale.bandwidth() / 2)
+      .attr("y", (data) => yScale(data.volume) - 20)
+      .attr("text-anchor", "middle")
+      .classed("label", true);
   }, [data]);
   return <svg ref={svgRef}></svg>;
 }
