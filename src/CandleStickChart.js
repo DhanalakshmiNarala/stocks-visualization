@@ -8,7 +8,7 @@ export default function CandleStickChart() {
 
   useEffect(() => {
     getCompanyStockData("AAL").then((stockdata) => {
-      stockdata = stockdata.slice(0, 5);
+      stockdata = stockdata.slice(0, 50);
       setData(stockdata);
     });
   }, []);
@@ -16,7 +16,7 @@ export default function CandleStickChart() {
   useEffect(() => {
     const margins = { top: 20, bottom: 10 };
     const chartHeight = 500;
-    const chartWidth = 500 - margins.top - margins.bottom;
+    const chartWidth = 1000 - margins.top - margins.bottom;
 
     const xScale = d3.scaleBand().rangeRound([0, chartWidth]).padding(0.1);
     const yScale = d3.scaleLinear().range([chartHeight, 0]);
@@ -46,18 +46,39 @@ export default function CandleStickChart() {
       .attr("width", xScale.bandwidth())
       .attr("x", (data) => xScale(data.date))
       .attr("y", (data) => yScale(data.volume))
-      .style("fill", "darkgreen");
+      .attr("fill", (data) => (data.close > data.open ? "green" : "red"));
 
-    chart
-      .selectAll(".label")
-      .data(data)
+    const x = d3.scaleBand().rangeRound([0, chartWidth]).padding(0.1);
+    const y = d3.scaleLinear().range([chartHeight, 0]);
+
+    x.domain(data.map((data) => data.date));
+    y.domain([0, d3.max(data, (data) => data.close) + 3]);
+
+    const candles = chartContainer.append("g");
+    candles
+      .selectAll("rect")
+      .data(data, (data) => data)
       .enter()
-      .append("text")
-      .text((data) => data.date)
-      .attr("x", (data) => xScale(data.date) + xScale.bandwidth() / 2)
-      .attr("y", (data) => yScale(data.volume) - 20)
-      .attr("text-anchor", "middle")
-      .classed("label", true);
+      .append("rect")
+      .attr("height", (data) => Math.abs(y(data.close) - y(data.open)))
+      .attr("width", xScale.bandwidth())
+      .attr("x", (data) => xScale(data.date))
+      .attr("y", (data) => y(data.close))
+      .attr("fill", (data) => (data.close > data.open ? "green" : "red"));
+
+    const barWidth = xScale.bandwidth();
+    const sticks = chartContainer.append("g");
+    sticks
+      .selectAll("line")
+      .data(data, (data) => data)
+      .enter()
+      .append("line")
+      .attr("x1", (data) => Math.abs(xScale(data.date)) + barWidth / 2)
+      .attr("y1", (data) => y(data.high))
+      .attr("x2", (data) => Math.abs(xScale(data.date)) + barWidth / 2)
+      .attr("y2", (data) => y(data.low))
+      .style("stroke", (data) => (data.close > data.open ? "green" : "red"))
+      .style("stroke-width", 1);
   }, [data]);
   return <svg ref={svgRef}></svg>;
 }
