@@ -8,10 +8,11 @@ export default function LineChart() {
 
   useEffect(() => {
     getCompanyStockData("AAL").then((data) => setData(data));
+    // setData([25, 30, 45, 60, 20]);
   }, []);
 
   useEffect(() => {
-    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+    // const margin = { top: 20, right: 30, bottom: 30, left: 40 };
     const chartHeight = 500;
     const chartWidth = 500;
     const chartContainer = d3
@@ -26,19 +27,23 @@ export default function LineChart() {
     xScale.domain(data.map((data) => data.date));
     yScale.domain([0, d3.max(data, (data) => data.volume) + 3]);
 
-    const chart = chartContainer.append("g");
+    const svg = d3.select(svgRef.current);
+    const myLine = d3
+      .line()
+      .x((data) => Math.round(xScale(data.date)))
+      .y((data) => Math.round(yScale(data.volume)));
 
-    chart
+    svg
       .selectAll("path")
-      .data(data)
-      .enter()
-      .append("path")
-      .attr(
-        "d",
-        d3.line().x((d) => xScale(d.date).y(d.volume))
-      )
-      .style("stroke", "purple")
-      .style("stroke-width", 1.5);
+      .data([data])
+      .join("svg")
+      .attr("d", (data) => myLine(data))
+      .attr("fill", "none")
+      .attr("stroke", "blue");
   }, [data]);
-  return <svg ref={svgRef}></svg>;
+  return (
+    <svg ref={svgRef}>
+      <path d="M0,150 100,100 150,120" stroke="blue" fill="none" />
+    </svg>
+  );
 }

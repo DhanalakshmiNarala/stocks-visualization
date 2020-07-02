@@ -28,7 +28,7 @@ export default function CandleStickChart() {
       .select(svgRef.current)
       .attr("height", chartHeight + margins.top + margins.bottom)
       .attr("width", chartWidth)
-      .style("background", "lightblue");
+      .style("background", "#DAF7A6");
 
     const chart = chartContainer.append("g");
 
