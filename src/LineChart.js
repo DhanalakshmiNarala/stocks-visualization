@@ -8,11 +8,9 @@ export default function LineChart() {
 
   useEffect(() => {
     getCompanyStockData("AAL").then((data) => setData(data));
-    // setData([25, 30, 45, 60, 20]);
   }, []);
 
   useEffect(() => {
-    // const margin = { top: 20, right: 30, bottom: 30, left: 40 };
     const chartHeight = 500;
     const chartWidth = 500;
     const chartContainer = d3
@@ -41,9 +39,5 @@ export default function LineChart() {
       .attr("fill", "none")
       .attr("stroke", "blue");
   }, [data]);
-  return (
-    <svg ref={svgRef}>
-      <path d="M0,150 100,100 150,120" stroke="blue" fill="none" />
-    </svg>
-  );
+  return <svg ref={svgRef}></svg>;
 }
